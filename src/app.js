@@ -1,9 +1,11 @@
-import  express  from "express";
+import  express, { json, response }  from "express";
 import { createPool } from 'mysql2/promise';
+import cors from 'cors';
 
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 const PORT = 3000;
@@ -23,6 +25,8 @@ const pool = createPool({
     database: DB_DATABASE
 });
 
+//----------- REGISTROS DE USUARIOS-----------------
+
 //------------Consulta Usuario-----------------------
 app.get('/RegistroUsuarios',async(req,res)=>{ //Metodo GET para obtener o llamar datos.
     try{
@@ -37,6 +41,7 @@ app.get('/RegistroUsuarios',async(req,res)=>{ //Metodo GET para obtener o llamar
     
 });
 
+
 //------------Agregar Usuarios-----------------------
 app.post("/RegistroUsuarios",async(req,res)=>{
     try {
@@ -50,6 +55,71 @@ app.post("/RegistroUsuarios",async(req,res)=>{
             return res.status(500).json({Message:"Error al procesar"})
     }
 });
+
+app.get('/RegistroUsuarios/:IDUsuarios',async (req,res)=>{ //Metodo para un solo usuario - consulta
+    try {
+    const {IDUsuarios} =req.params;
+    const [rows] = await pool.query("Select IDUsuarios,NombreUsuario,ApellidoUsuario,correo,telefono from RegistroUsuarios Where IDUsuarios = ?",[IDUsuarios])
+    if(rows.length > 0)
+    {
+        res.json(rows);
+    }
+    else{
+        res.status(404).json({MESSAGE:"No hay informacion"})
+    }
+    } catch (error) {
+        console.error("Error",error);
+        return res.status(500).json({Message:"Error al procesar la solicitud"});
+    }
+})
+
+
+app.put('/RegistroUsuarios/:IDUsuarios',async (req,res)=>{
+    try {
+        const {IDUsuarios} = req.params;
+        const {NuevoNombre,NuevoApellido,correo,telefono} = req.body;
+        const [result] = await pool.query("UPDATE RegistroUsuarios set NombreUsuario = IFNULL(?,NombreUsuario), ApellidoUsuario = IFNULL(?,ApellidoUsuario), correo = IFNULL(?,correo), telefono = IFNULL(?,telefono)  WHERE IDUsuarios = ?",
+        [NuevoNombre,NuevoApellido,correo,telefono,IDUsuarios])
+
+        if (result.affectedRows === 0)
+        {
+            res.status(404).json({MESSAGE:"Usuario no encontrado"});
+        }
+        else
+        res.json({Message:"Datos guardados"});
+   
+    } catch (error) {
+        console.error("ERROR",error);
+        return res.status(500).json({MESSAGE:"Error al procesar la solicitud"})
+    }
+})
+
+
+app.delete('/RegistroUsuarios/:IDUsuarios',async (req,res)=>{
+    try {
+        const {IDUsuarios} = req.params;
+        const [rows] = await pool.query("DELETE FROM RegistroUsuarios WHERE IDUsuarios = ?",
+        [IDUsuarios]); 
+
+        if(rows.affectedRows <=0)
+        {
+            return res.status(404).json({MESSAGE:"Usuario  no encontrado"})
+        }else
+        res.status(204).json({MESSAGE:"Usuario Eliminado"});
+
+    } catch (error) {
+        console.error("ERROR",error);
+        return res.status(500).json({MESSAGE:"Error al procesar la solicitud"})
+    
+    }
+});
+
+
+
+//-------------------------------------------------------------------------------
+
+
+//----------------------RegistroAdministrador-----------------------------------
 
 
 //------------Consulta Administrador-----------------------
@@ -81,6 +151,71 @@ app.post("/Administradores",async(req,res)=>{
     }
 });
 
+app.get('/Administradores/:IDAdministradores',async (req,res)=>{ 
+    try {
+    const {IDAdministradores} =req.params;
+    const [rows] = await pool.query("Select IDAdministradores,NombreAdministrador,ApellidoAdministrador,password,correo,ID from Administradores Where IDAdministradores = ?",[IDAdministradores])
+    if(rows.length > 0)
+    {
+        res.json(rows);
+    }
+    else{
+        res.status(404).json({MESSAGE:"No hay informacion"})
+    }
+    } catch (error) {
+        console.error("Error",error);
+        return res.status(500).json({Message:"Error al procesar la solicitud"});
+    }
+})
+
+
+app.put('/Administradores/:IDAdministradores',async (req,res)=>{
+    try {
+        const {IDAdministradores} = req.params;
+        const {NuevoNombre,NuevoApellido,password,correo,ID } = req.body;
+        const [result] = await pool.query("UPDATE Administradores set NombreAdministrador = IFNULL(?,NombreAdministrador), ApellidoAdministrador = IFNULL(?,ApellidoAdministrador),password= IFNULL(?,password), correo = IFNULL(?,correo), ID = IFNULL(?,ID)  WHERE IDAdministradores = ?",
+        [NuevoNombre,NuevoApellido,password,correo,ID,IDAdministradores])
+
+        if (result.affectedRows === 0)
+        {
+            res.status(404).json({MESSAGE:"Administrador no encontrado"});
+        }
+        else
+        res.json({Message:"Datos guardados"});
+   
+    } catch (error) {
+        console.error("ERROR",error);
+        return res.status(500).json({MESSAGE:"Error al procesar la solicitud"})
+    }
+})
+
+
+app.delete("/Administradores/:IDAdministradores",async(req,res)=>{
+    try {
+        const {IDAdministradores} = req.params;
+        const [rows] = await pool.query("DELETE FROM Administradores WHERE IDAdministradores = ?",
+        [IDAdministradores]); 
+
+        if(rows.affectedRows <=0)
+        {
+            return res.status(404).json({MESSAGE:"Administrador  no encontrado"})
+        }else
+        res.status(204).json({MESSAGE:"Administrador Eliminado"});
+
+    } catch (error) {
+        console.error("ERROR",error);
+        return res.status(500).json({MESSAGE:"Error al procesar la solicitud"})
+    
+    }
+})
+
+
+
+//-------------------------------------------------------------------------------
+
+
+//----------------------DetallesdeAdministrador-----------------------------------
+
 
 //------------Consulta DetallesAdministrador-----------------------
 app.get('/DetallesAdministrador',async(req,res)=>{ //Metodo GET para obtener o llamar datos.
@@ -111,6 +246,76 @@ app.post("/DetallesAdministrador",async(req,res)=>{
 });
 
 
+app.get('/DetallesAdministrador/:IDDetallesAdministrador',async(req,res)=>{ 
+    try{
+        const {IDDetallesAdministrador} = req.params;
+        const [rows] = await pool.query("SELECT IDDetallesAdministrador,IDAdministradores,NombreAdministrador,ApellidoAdministrador,NumeroTelefono,Direccion,Edad from DetallesAdministrador where IDDetallesAdministrador = ?",[IDDetallesAdministrador])
+        if(rows.length > 0)
+        {
+            res.json(rows);
+        }
+        else{
+            res.status(404).json({MESSAGE:"No hay informacion"})
+        }
+    
+    } catch(error){
+        console.error("Error",error);
+        
+        return res.status(500).json({Message:"Error al procesar la solicitud"});
+    }
+    
+});
+
+app.put('/DetallesAdministrador/:IDDetallesAdministrador',async(req,res)=>{
+    try {
+        const {IDDetallesAdministrador} = req.params;
+        const {NuevoNombre,NuevoApellido,NumeroTelefono,Direccion,Edad} = req.body;
+        const [rows] = await pool.query("UPDATE DetallesAdministrador set NombreAdministrador = IFNULL(?,NombreAdministrador), ApellidoAdministrador = IFNULL(?,ApellidoAdministrador), NumeroTelefono = IFNULL(?,NumeroTelefono), Direccion = IFNULL(?,Direccion), Edad = IFNULL(?,Edad)  WHERE IDDetallesAdministrador = ?",
+        [NuevoNombre,NuevoApellido,NumeroTelefono,Direccion,Edad,IDDetallesAdministrador]);
+
+        if(rows.affectedRows === 0)
+        {
+            res.status(404).json({MESSAGE:"Administrador no encontrado"});
+        }
+        else
+            res.json({MESSAGE:"Datos Guardados"});
+     
+
+    } catch (error) {
+        console.error("Error",error);
+        return res.status(500).json({MESSAGE:"Error la procesar la solicitud"});
+    }
+})
+
+
+app.delete('/DetallesAdministrador/:IDDetallesAdministrador',async(req,res)=>{
+    try {
+        const {IDDetallesAdministrador} =req.params;
+        const [rows] = await pool.query("DELETE FROM DetallesAdministrador WHERE IDDetallesAdministrador = ?",
+        [IDDetallesAdministrador]);
+
+        if(rows.affectedRows <= 0)
+        {
+            res.status(404).json({MESSAGE:"Administrador no encontrado"});
+        }else
+            res.status(204).json({MESSAGE:"Administrador Eliminado"});        
+
+    } catch (error) {
+        console.error("Error",error);
+        return res.status(500).json({MESSAGE:"Error al procesar la solicitud"});
+    }
+})
+
+
+
+
+
+//-------------------------------------------------------------------------------
+
+
+//----------------------Peliculas-----------------------------------
+
+
 //------------Consulta Pelicula-----------------------
 app.get('/Pelicula',async(req,res)=>{ //Metodo GET para obtener o llamar datos.
     try{
@@ -138,6 +343,72 @@ app.post("/Pelicula",async(req,res)=>{
             return res.status(500).json({Message:"Error al procesar"})
     }
 });
+
+app.get('/Pelicula/:IDPelicula',async(req,res)=>{
+    try {
+        const {IDPelicula} = req.params;
+        const [rows] = await pool.query("Select IDPelicula ,NombrePelicula,GeneroPelicula,fechaEstreno,DuracionPelicula from Pelicula where IDPelicula = ?",[IDPelicula]);
+        if(rows.length > 0){
+            res.json(rows);
+        }else
+        res.status(404).json({MESSAGE:"no hay informacion"});
+
+    } catch (error) {
+        console.error("Error",error);
+        return res.status(500).json({Message:"Error al procesar la Solicitud"});
+    }
+});
+
+app.put('/Pelicula/:IDPelicula',async(req,res)=>{
+     try {
+        const {IDPelicula} = req.params;
+        const {NuevoNombre,NuevoGenero,fechaEstreno,DuracionPelicula} = req.body;
+        const [rows] = await pool.query("UPDATE Pelicula set NombrePelicula = IFNULL(?,NombrePelicula), GeneroPelicula = IFNULL(?,GeneroPelicula), FechaEstreno = IFNULL(?,FechaEstreno), DuracionPelicula = IFNULL(?,DuracionPelicula) WHERE IDPelicula = ?",
+        [NuevoNombre,NuevoGenero,fechaEstreno,DuracionPelicula,IDPelicula]);
+        if(rows.affectedRows === 0 ){
+            res.status(404).json({MESSAGE:"Pelicula no encontrada"});
+        }
+        else{
+            res.json({MESSAGE:"Datos guardados"});
+        }
+    } catch (error) {
+        console.error("Error",error);
+        return res.status(500).json({MESSAGE:"Error al procesar la solicitud"})
+     }
+})
+
+
+
+app.delete('/Pelicula/:IDPelicula',async(req,res)=>{
+    try {
+        const {IDPelicula} =req.params;
+        const [rows] = await pool.query("DELETE FROM Pelicula WHERE IDPelicula = ?",[IDPelicula]);
+        
+        if(rows.affectedRows <= 0)
+        {
+            res.status(404).json({MESSAGE:"Pelicula no encontrada"});
+        }else{
+            res.status(204).json({MESSAGE:"Pelicula eliminada"})
+        }
+
+    } catch (error) {
+        console.error("Error",error);
+        return res.status(500).json({MESSAGE:"Error al procesar la solicitud"});
+    }
+})
+
+
+
+
+
+
+
+
+//-------------------------------------------------------------------------------
+
+
+//----------------------Sala de cine-----------------------------------
+
 
 
 //------------Consulta Sala Cine-----------------------

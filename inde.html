@@ -28,9 +28,63 @@
     </div>
   </div>
   
-
+  <div class="tablero">
+    <div class="fila">
+      <div class="asiento ocupado">1</div>
+      <div class="asiento libre">2</div>
+      <div class="asiento libre">3</div>
+      <div class="asiento ocupado">4</div>
+    </div>
+    <div class="fila">
+      <div class="asiento libre">5</div>
+      <div class="asiento ocupado">6</div>
+      <div class="asiento ocupado">7</div>
+      <div class="asiento libre">8</div>
+    </div>
+    <div class="fila">
+      <div class="asiento libre">9</div>
+      <div class="asiento libre">10</div>
+      <div class="asiento ocupado">11</div>
+      <div class="asiento libre">12</div>
+    </div>
+  </div>
+  
 
 <style>
+
+
+.tablero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fila {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+}
+
+.asiento {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 50px;
+}
+
+.libre {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.ocupado {
+  background-color: #f44336;
+  color: white;
+}
+
 
     .navbar {
   background-color: #f2f2f2;

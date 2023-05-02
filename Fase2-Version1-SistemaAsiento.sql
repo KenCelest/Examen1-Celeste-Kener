@@ -151,6 +151,9 @@ Select * From Pelicula;
 select * From saladeCine;
 select * From Tanda;
 select * From Asientos;
+Select * from Boletos;
+
+
 
 Insert into Administradores(NombreAdministrador,ApellidoAdministrador,password,correo,ID) values("Celeste","Rojas","root124","Celeste@gmail.com","12345");
 insert into RegistroUsuarios(NombreUsuario,ApellidoUsuario,correo,telefono)values("Mario","Jose","Mario@gmaill.com","892356921");
@@ -160,10 +163,12 @@ Insert into saladeCine(NombreSala,Capacidad,Ubicacion)values("Salon1",15,"Pasill
 Insert into Tanda(FechaInicio,FechaFin,HoraInicio,HoraFin,IDPelicula,IdSala)values('2023-04-5','2023-04-15','11:15:00','1:30:00',1,1);
 Insert into Asientos(IDUsuarios,NombreUsuario,NombreSala,Filas,NumeroAsientos,idSala)values(1,"Mario","Salon2","A",1,2);
 Insert into DetalleDeReservacion(IDUsuarios,IdSala,NombreUsuario,ApellidoUsuario,Pelicula,NombreSala,CantidadBoletos,FechaReservacion) values(1,2,"Mario","Jose","Jhon Wick","Salon2",1,'2023-04-18');
-
-
-Select * from Boletos;
 Insert into Boletos(IDDetallesReservacion,NombreUsuario,pelicula,Filas,NumeroAsientos,NombreSala,horaInicio)values(1,'Mario','Jhon Wick','A',1,'Salon2','11:15:00');
+
+
+
+
+
 
 Select p.IDPelicula,t.FechaInicio,t.HoraInicio,p.NombrePelicula ,t.IdSala
 From Pelicula p
